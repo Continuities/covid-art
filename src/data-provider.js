@@ -1,14 +1,31 @@
 import fetch from 'isomorphic-fetch';
+import testData from './test-data.json';
 
+const USE_TEST_DATA = false;
 const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
 const DATA_URL = `${CORS_PROXY}https://data.ontario.ca/datastore/dump/455fd63b-603d-4608-8216-7d8647f43350?format=json`;
 
-export const getData = async () => {
-  const response = await fetch(DATA_URL);
+const loadData = async () => {
+  if (USE_TEST_DATA) {
+    return testData;
+  }
+
+  const response = await fetch(DATA_URL, {
+    headers: {
+      'X-Requested-With': 'nineteen-app'
+    }
+  });
+
   if (response.status >= 400) {
     throw new Error("Bad response from server");
   }
-  const data = await response.json();
+
+  return response.json();
+};
+
+export const getData = async () => {
+  
+  const data = await loadData();
 
   const byDate = new Map();
 
@@ -21,7 +38,7 @@ export const getData = async () => {
       lat: r[12],
       long: r[13]
     };
-    const key = info.date.toLocaleDateString();
+    const key = info.date.getTime();
     if (!byDate.has(key)) {
       byDate.set(key, []);
     }

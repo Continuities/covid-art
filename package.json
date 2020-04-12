@@ -1,5 +1,5 @@
 {
-  "name": "covid-art",
+  "name": "nineteen",
   "version": "1.0.0",
   "private": true,
   "license": "MIT",
@@ -10,11 +10,17 @@
     "dev": "webpack-dev-server --config webpack.config.cjs --mode development --devtool inline-source-map --hot"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.13.0",
     "isomorphic-fetch": "^2.2.1",
     "jss": "^10.1.1"
   },
   "devDependencies": {
+    "css-loader": "^3.5.2",
+    "favicons-webpack-plugin": "^3.0.1",
     "html-webpack-plugin": "^4.2.0",
+    "html-webpack-tags-plugin": "^2.0.17",
+    "opengraph-html-webpack-plugin": "^1.0.0",
+    "style-loader": "^1.1.3",
     "webpack": "^4.42.1",
     "webpack-cli": "^3.3.11",
     "webpack-dev-server": "^3.10.3"

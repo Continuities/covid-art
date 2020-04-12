@@ -1,75 +1,101 @@
 import RasteredData from './rastered-data.js';
-import jss from 'jss';
+import { easeInOutQuad as easing } from './easing.js';
+import Palettes from './palettes.js';
+import './style.css';
 
-const DAY_LENGTH = 100; // ms
+const DAY_LENGTH = 60; // frames
 const LOGICAL_SIZE = 1024;
 const BUBBLE_SCALE = 10;
+const EXPAND_RATE = 0.01; // % per frame
+const FADE_RATE = 2; // frames
+const OFFSET_RANGE = 0.4; // % from beginning and end of range
 
-const { classes } = jss.createStyleSheet({
-  container: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    display: 'flex',
-    'align-items': 'center',
-    'justify-content': 'center'
-  },
-  canvas: {
+const invert = ([ r, g, b ]) => [
+  255 - r,
+  255 - g,
+  255 - b
+];
 
-  }
-}).attach();
+const BubbleView = async (loader, resolution) => {
 
-const BubbleView = (input, resolution) => {
+  let palette;
+  const updatePalette = () => {
+    palette = Palettes[Math.floor(Math.random() * Palettes.length)];
+    document.body.style.backgroundColor = `rgb(${palette.bg.join(',')})`;
+    document.body.style.color = `rgb(${invert(palette.bg).join(',')})`;
+  };
+
+  updatePalette();
+  addLoader();
+
+  const input = await loader;
+
+  document.body.innerHTML = '';
+
   const data = RasteredData(input, resolution);
-  const dates = [...data.keys()].sort((a, b) => new Date(a) - new Date(b));
-
-  const container = document.createElement('div');
-  container.className = classes.container;
-  document.body.appendChild(container);
+  const dates = [...data.keys()].sort((a, b) => parseInt(a) - parseInt(b));
 
   const canvas = document.createElement('canvas');
-  canvas.className = classes.canvas;
-  container.appendChild(canvas);
+  document.body.appendChild(canvas);
 
   const toViewCoords = (col, row) => ({
     x: (LOGICAL_SIZE / (resolution + 1)) * col,
     y: (LOGICAL_SIZE / (resolution + 1)) * row
   });
 
-  const ctx = getScaledContext(canvas);
+  const [ ctx, centerPoint ] = scale(canvas);
   ctx.globalCompositeOperation = 'difference';
   let currentDay = 0;
-  let lastDay = null;
+  let background = null;
+  let framesLeftInDay;
+  let dayBubbles;
+
+  const updateDay = () => {
+    if (currentDay >= dates.length) {
+      updatePalette();
+      currentDay = 0;
+    }
+    framesLeftInDay = DAY_LENGTH;
+    dayBubbles = computeBubbles(data.get(dates[currentDay]).total, palette);
+    currentDay++;
+  };
+
+  updateDay();
+
+  document.body.className = 'with-transition';
+
   const nextFrame = () => {
-
-    if (lastDay == null) {
-      lastDay = Date.now();
-    }
-    else if (Date.now() > lastDay + DAY_LENGTH) {
-      if (++currentDay >= dates.length) {
-        currentDay = 0;
-      }
-      lastDay = Date.now();
-    }
-
-    const frame = data.get(dates[currentDay]).total;
 
     ctx.clearRect(0, 0, LOGICAL_SIZE, LOGICAL_SIZE);
 
-    // TODO: An enumerable list of hot cells would probably be better
-    for (let c in frame) {
-      for (let r in frame[c]) {
-        const size = frame[c][r] * BUBBLE_SCALE;
-        if (size <= 0) { continue; }
-        const p = toViewCoords(c, r);
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, size / 2, 0, Math.PI * 2);
-        ctx.fillStyle = '#FF4136';
-        ctx.fill();
-      }
+    if (background) {
+      fade(background);
+      ctx.putImageData(background, 0, 0);
     }
+
+    if (framesLeftInDay <= 0) {
+      updateDay();
+    }
+
+    const dayProgress = 1 - (framesLeftInDay / DAY_LENGTH);
+
+    for (let bubble of dayBubbles) {
+      const bubbleProgress = easing(mapProgressRange(bubble.start, bubble.end, dayProgress));
+      const bubbleAlpha = dayProgress > bubble.end ? 1 - (dayProgress - bubble.end) : 1;
+      const size = bubble.size * BUBBLE_SCALE * bubbleProgress;
+      if (size <= 0) { continue; }
+      const p = centerPoint(toViewCoords(bubble.col, bubble.row));
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, size / 2, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${bubble.colour.join(',')}, ${bubbleAlpha})`;
+      ctx.fill();
+      ctx.closePath();
+    }
+
+    if (--framesLeftInDay <= 0) {
+      background = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    }
+
   };
 
   return {
@@ -77,27 +103,79 @@ const BubbleView = (input, resolution) => {
   };
 };
 
-function getScaledContext(canvas) {
+function addLoader() {
+  const loader = document.createElement('div');
+  loader.className = 'loader';
+  loader.innerText = "Fetching recent data...";
+  const spinner = document.createElement('div');
+  spinner.className='lds-ring';
+  spinner.innerHTML = '<div></div><div></div><div></div><div></div>';
+  loader.appendChild(spinner);
+  document.body.appendChild(loader);
+}
+
+function mapProgressRange(start, end, p) {
+  if (p <= start) {
+    return 0;
+  }
+  if (p >= end) {
+    return 1;
+  }
+  return (p - start) * 1 / (end - start);
+}
+
+function computeBubbles(frame, palette) {
+  const bubbles = [];
+  for (let c in frame) {
+    for (let r in frame[c]) {
+      if (frame[c][r] <= 0) { continue; }
+      bubbles.push({
+        row: r,
+        col: c,
+        colour: palette.fg[Math.floor(Math.random() * palette.fg.length)],
+        start: Math.random() * OFFSET_RANGE,
+        end: 1 - (Math.random() * OFFSET_RANGE),
+        size: frame[c][r]
+      });
+    }
+  }
+  return bubbles;
+}
+
+function fade(imageData) {
+  const data = imageData.data;
+  for (let i = 3; i < data.length; i += 4) {
+    data[i] -= FADE_RATE;
+  }
+}
+
+function scale(canvas) {
 
   const ctx = canvas.getContext('2d');
+  let scale = 1;
   const sizeCanvas = () => {
-    const size = Math.min(window.innerHeight, window.innerWidth);
-    canvas.style.height = canvas.style.width = `${size}px`;
-
-    const scale = size / LOGICAL_SIZE;
+    const boundingDimension = Math.min(window.innerHeight, window.innerWidth);
     const dpr = window.devicePixelRatio || 1;
+    scale = boundingDimension / LOGICAL_SIZE;
+
+    canvas.style.height = `${window.innerHeight}px`;
+    canvas.style.width = `${window.innerWidth}px`;
+    canvas.height = window.innerHeight * dpr;
+    canvas.width = window.innerWidth * dpr;
     
-    canvas.width = canvas.height = size * dpr;
-    // Scale all drawing operations by the dpr, so you
-    // don't have to worry about the difference.
     ctx.scale(scale * dpr, scale * dpr);
   };
+
+  const centerPoint = ({ x, y }) => ({
+    x: x + ((window.innerWidth / scale) - LOGICAL_SIZE) / 2,
+    y: y + ((window.innerHeight / scale) - LOGICAL_SIZE) / 2,
+  });
 
   sizeCanvas();
 
   window.addEventListener('resize', sizeCanvas);
 
-  return ctx;
+  return [ ctx, centerPoint ];
 }
 
 export default BubbleView;

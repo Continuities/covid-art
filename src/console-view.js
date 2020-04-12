@@ -6,7 +6,7 @@ function centerPad(s, num) {
 
 const ConsoleView = (input, resolution) => {
   const data = RasteredData(input, resolution);
-  const dates = [...data.keys()].sort((a, b) => new Date(a) - new Date(b));
+  const dates = [...data.keys()].sort((a, b) => parseInt(a) - parseInt(b));
   let currentFrame = 0;
 
   return {
