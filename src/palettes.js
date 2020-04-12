@@ -95,7 +95,34 @@ export const Savanna = {
     [ 137, 152, 87 ],
     [ 82, 115, 24 ]
   ]
-}
+};
+
+export const Beach = {
+  bg: [ 0, 184, 169 ],
+  fg: [
+    [ 248, 243, 212 ],
+    [ 246, 65, 108 ],
+    [ 255, 222, 125 ]
+  ]
+};
+
+export const Slate = {
+  bg: [ 34, 40, 49 ],
+  fg: [
+    [ 57, 62, 70 ],
+    [ 0, 173, 181 ],
+    [ 238, 238, 238 ]
+  ]
+};
+
+export const CandyFloss = {
+  bg: [ 126, 255, 219 ],
+  fg: [
+    [ 182, 147, 254 ],
+    [ 140, 130, 252 ],
+    [ 255, 157, 226 ]
+  ]
+};
 
 export default [
   Red, 
@@ -108,5 +135,8 @@ export default [
   Green, 
   Sand,
   Abyss,
-  Savanna
+  Savanna,
+  Beach,
+  Slate,
+  CandyFloss
 ];
