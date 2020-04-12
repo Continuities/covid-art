@@ -1,13 +1,22 @@
 {
   "name": "covid-art",
   "version": "1.0.0",
-  "main": "src/main.js",
+  "private": true,
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "start": "node src/main.js"
+    "start": "node src/node-main.js",
+    "build": "webpack --config webpack.config.cjs",
+    "dev": "webpack-dev-server --config webpack.config.cjs --mode development --devtool inline-source-map --hot"
   },
   "dependencies": {
-    "isomorphic-fetch": "^2.2.1"
+    "isomorphic-fetch": "^2.2.1",
+    "jss": "^10.1.1"
+  },
+  "devDependencies": {
+    "html-webpack-plugin": "^4.2.0",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3"
   }
 }
