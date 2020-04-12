@@ -1,0 +1,13 @@
+{
+  "name": "covid-art",
+  "version": "1.0.0",
+  "main": "src/main.js",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "start": "node src/main.js"
+  },
+  "dependencies": {
+    "isomorphic-fetch": "^2.2.1"
+  }
+}
