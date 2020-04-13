@@ -75,7 +75,7 @@ const BubbleView = async (loader, resolution) => {
 
   const displayDate = () => {
     const isoString = new Date(dates[currentDay]).toISOString();
-    const dayString = isoString.substring(0, isoString.indexOf('T'));
+    const dayString = isoString.substring(0, isoString.indexOf('T')).replace(/-/g,' ');
     dateDisplay.innerText = dayString;
   };
 
