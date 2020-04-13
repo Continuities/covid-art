@@ -48,6 +48,10 @@ const BubbleView = async (loader, resolution) => {
   const canvas = document.createElement('canvas');
   document.body.appendChild(canvas);
 
+  const dateDisplay = document.createElement('div');
+  dateDisplay.className = 'date-display';
+  document.body.appendChild(dateDisplay);
+
   const gridToView = (col, row) => ({
     x: (LOGICAL_SIZE / (resolution + 1)) * (col + 1),
     y: (LOGICAL_SIZE / (resolution + 1)) * (row + 1)
@@ -69,6 +73,12 @@ const BubbleView = async (loader, resolution) => {
   let framesLeftInDay;
   let dayBubbles;
 
+  const displayDate = () => {
+    const isoString = new Date(dates[currentDay]).toISOString();
+    const dayString = isoString.substring(0, isoString.indexOf('T'));
+    dateDisplay.innerText = dayString;
+  };
+
   const updateDay = () => {
     if (++currentDay >= dates.length) {
       nextPalette();
@@ -79,6 +89,7 @@ const BubbleView = async (loader, resolution) => {
       data.get(dates[currentDay]).total, 
       Palettes[paletteIndex]
     );
+    displayDate();
   };
   updateDay();
 

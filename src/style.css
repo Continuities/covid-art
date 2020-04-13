@@ -47,6 +47,15 @@ body.with-transition {
   font-family: sans-serif;
 }
 
+.date-display {
+  position: absolute;
+  cursor: default;
+  user-select: none;
+  font-size: 20vw;
+  opacity: 0.05;
+  mix-blend-mode: difference;
+}
+
 .lds-ring {
   display: inline-block;
   position: relative;
