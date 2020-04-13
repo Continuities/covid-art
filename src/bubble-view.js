@@ -18,9 +18,17 @@ const invert = ([ r, g, b ]) => [
 
 const BubbleView = async (loader, resolution) => {
 
-  let palette;
+  let paletteIndex;
   const updatePalette = () => {
-    palette = Palettes[Math.floor(Math.random() * Palettes.length)];
+    if (paletteIndex == null) {
+      paletteIndex = Math.floor(Math.random() * Palettes.length);
+    }
+    else {
+      if (++paletteIndex >= Palettes.length) {
+        paletteIndex = 0;
+      }
+    }
+    const palette = Palettes[paletteIndex];
     document.body.style.backgroundColor = `rgb(${palette.bg.join(',')})`;
     document.body.style.color = `rgb(${invert(palette.bg).join(',')})`;
   };
@@ -44,7 +52,6 @@ const BubbleView = async (loader, resolution) => {
   });
 
   const [ ctx, centerPoint ] = scale(canvas);
-  ctx.globalCompositeOperation = 'difference';
   let currentDay = 0;
   let background = null;
   let framesLeftInDay;
@@ -56,7 +63,7 @@ const BubbleView = async (loader, resolution) => {
       currentDay = 0;
     }
     framesLeftInDay = DAY_LENGTH;
-    dayBubbles = computeBubbles(data.get(dates[currentDay]).total, palette);
+    dayBubbles = computeBubbles(data.get(dates[currentDay]).total, Palettes[paletteIndex]);
     currentDay++;
   };
 
@@ -65,7 +72,7 @@ const BubbleView = async (loader, resolution) => {
   document.body.className = 'with-transition';
 
   const nextFrame = () => {
-
+    ctx.globalCompositeOperation = 'difference';
     ctx.clearRect(0, 0, LOGICAL_SIZE, LOGICAL_SIZE);
 
     if (background) {
