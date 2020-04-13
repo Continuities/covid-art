@@ -11,7 +11,7 @@ body {
 }
 
 body.with-transition {
-  transition: background-color 1000ms;
+  transition: background-color 1000ms, color 1000ms;
 }
 
 .credits {

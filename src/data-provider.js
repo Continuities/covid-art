@@ -1,14 +1,9 @@
 import fetch from 'isomorphic-fetch';
-import testData from './test-data.json';
 
-const USE_TEST_DATA = false;
 const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
 const DATA_URL = `${CORS_PROXY}https://data.ontario.ca/datastore/dump/455fd63b-603d-4608-8216-7d8647f43350?format=json`;
 
 const loadData = async () => {
-  if (USE_TEST_DATA) {
-    return testData;
-  }
 
   const response = await fetch(DATA_URL, {
     headers: {
@@ -35,6 +30,7 @@ export const getData = async () => {
     const info = {
       date: new Date(r[2]),
       resolved: r[6] === 'Resolved',
+      city: r[9],
       lat: r[12],
       long: r[13]
     };
