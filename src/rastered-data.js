@@ -5,7 +5,7 @@ const RasteredData = (input, resolution) => {
 
   const mapToPoint = (lat, long) => ({
     x: Math.min(Math.floor((long - input.minLong) / longQuantum), resolution - 1),
-    y: Math.min(Math.floor((lat - input.minLat) / latQuantum), resolution - 1)
+    y: resolution - Math.min(Math.floor((lat - input.minLat) / latQuantum), resolution - 1)
   });
 
   const rastered = new Map();
