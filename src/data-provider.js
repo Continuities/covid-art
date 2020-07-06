@@ -18,9 +18,35 @@ const loadData = async () => {
   return response.json();
 };
 
+const getIndecies = data => {
+  const indecies = {};
+  for (let i in data.fields) {
+    const field = data.fields[i];
+    switch (field.id) {
+      case 'Accurate_Episode_Date':
+        indecies.date = i;
+        break;
+      case 'Outcome1':
+        indecies.outcome = i;
+        break;
+      case 'Reporting_PHU_City':
+        indecies.city = i;
+        break;
+      case 'Reporting_PHU_Latitude':
+        indecies.lat = i;
+        break;
+      case 'Reporting_PHU_Longitude':
+        indecies.long = i;
+        break;
+    }
+  }
+  return indecies;
+};
+
 export const getData = async () => {
   
   const data = await loadData();
+  const indecies = getIndecies(data);
 
   const byDate = new Map();
 
@@ -28,11 +54,11 @@ export const getData = async () => {
   for (let r of data.records) {
     // lol this json is just a fancy CSV
     const info = {
-      date: new Date(r[2]),
-      resolved: r[6] === 'Resolved',
-      city: r[9],
-      lat: r[12],
-      long: r[13]
+      date: new Date(r[indecies.date]),
+      resolved: r[indecies.outcome] === 'Resolved',
+      city: r[indecies.city],
+      lat: r[indecies.lat],
+      long: r[indecies.long]
     };
     const key = info.date.getTime();
     if (!byDate.has(key)) {

@@ -52,8 +52,13 @@ body.with-transition {
   cursor: default;
   user-select: none;
   font-size: 20vw;
-  opacity: 0.05;
+  opacity: 0.2;
   mix-blend-mode: difference;
+  top: 50%;
+  left: 0;
+  margin-top: -10vw;
+  width: 100%;
+  text-align: center;
 }
 
 .lds-ring {
