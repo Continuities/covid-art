@@ -1,14 +1,13 @@
 import fetch from 'isomorphic-fetch';
 
-const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
-const DATA_URL = `${CORS_PROXY}https://data.ontario.ca/datastore/dump/455fd63b-603d-4608-8216-7d8647f43350?format=json`;
+const DATA_URL = `https://nineteen.itsmichael.workers.dev/datastore/dump/455fd63b-603d-4608-8216-7d8647f43350?format=json`;
 
 const loadData = async () => {
 
   const response = await fetch(DATA_URL, {
-    headers: {
-      'X-Requested-With': 'nineteen-app'
-    }
+    // headers: {
+    //   'X-Requested-With': 'nineteen-app'
+    // }
   });
 
   if (response.status >= 400) {
